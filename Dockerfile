@@ -8,6 +8,12 @@ ENV LANG=en_US.UTF-8 LANGUAGE=en_US:en LC_ALL=en_US.UTF-8 DEBIAN_FRONTEND=nonint
 
 ARG ONLYOFFICE_VALUE=onlyoffice
 
+
+RUN sed -i 's/archive.ubuntu.com/mirrors.aliyun.com/g' /etc/apt/sources.list && \
+    sed -i 's/security.ubuntu.com/mirrors.aliyun.com/g' /etc/apt/sources.list && \
+    apt-get clean && \
+    apt-get update
+
 RUN echo "#!/bin/sh\nexit 0" > /usr/sbin/policy-rc.d && \
     apt-get -y update && \
     apt-get -yq install wget apt-transport-https gnupg locales lsb-release && \
@@ -95,10 +101,12 @@ RUN PACKAGE_FILE="${COMPANY_NAME}-${PRODUCT_NAME}${PRODUCT_EDITION}${PACKAGE_VER
     service postgresql start && \
     apt-get -yq install /tmp/$PACKAGE_FILE && \
     service postgresql stop && \
-    chmod 755 /etc/init.d/supervisor && \
+    chmod 777 /etc/init.d/supervisor && \
+    chmod +x /etc/init.d/supervisor && \
     sed "s/COMPANY_NAME/${COMPANY_NAME}/g" -i /etc/supervisor/conf.d/*.conf && \
     service supervisor stop && \
-    chmod 755 /app/ds/*.sh && \
+    chmod 777 /app/ds/*.sh && \
+    chmod +x /app/ds/run-document-server.sh && \
     rm -f /tmp/$PACKAGE_FILE && \
     rm -rf /var/log/$COMPANY_NAME && \
     rm -rf /var/lib/apt/lists/*
